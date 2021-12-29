@@ -1,24 +1,81 @@
+import re
 import sys
+import nltk
+import pickle
+import numpy as np
+import pandas as pd
 
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem.wordnet import WordNetLemmatizer
+from sqlalchemy import create_engine
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+
+
+nltk.download(['punkt', 'stopwords', 'wordnet'])
 
 def load_data(database_filepath):
-    pass
+    engine = create_engine(f'sqlite:///{database_filepath}')
+    df = pd.read_sql_table('tweets', engine)
+    
+    return df
 
 
 def tokenize(text):
-    pass
+    # normalize
+    text = re.sub('\W', ' ', text.lower())
+    # tokenize
+    text = word_tokenize(text)
+    # remove stop words
+    text = [w for w in text if w not in stopwords.words('english')]
+    # lemmatize
+    text = [WordNetLemmatizer().lemmatize(w) for w in text]
+    
+    return text
 
 
 def build_model():
-    pass
+    
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+    
+    parameters = {
+        'clf__estimator__bootstrap': [True, False],
+        'clf__estimator__n_jobs': [1, 2, 3, 4, 5]
+    } 
+
+    cv = 5
+    
+    model = GridSearchCV(pipeline,
+                        parameters,
+                        cv=cv)
+    
+    
+    return model
 
 
-def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+def evaluate_model(model, X_test, Y_test):
+    
+    Y_pred = model.predict(X_test)
+    
+    for i, col in enumerate(Y_test):
+        print(col, classification_report(Y_test[col], Y_pred[:, i])
+              
 
 
 def save_model(model, model_filepath):
-    pass
+    
+    with open(model_filepath, 'wb') as file:
+        pickle.dump(model, file)
+    
 
 
 def main():

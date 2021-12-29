@@ -1,16 +1,58 @@
 import sys
+import pandas as pd
+import numpy as np
+from sqlalchemy import create_engine 
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    # reading massages and categories csv files
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+    
+    # merging the twe dataframe on id
+    df = messages.merge(categories, left_on='id', right_on='id')
+    
+    return df
 
 
 def clean_data(df):
-    pass
+    # create a dataframe of the 36 individual category columns
+    categories = df['categories'].str.split(';', expand=True)
+    
+    # select the first row of the categories dataframe
+    row = categories.head(1)
+    
+    # rename the columns of `categories`
+    get_col_name = lambda x: x[0][:-2]
+    category_col_names = list(row.apply(get_col_name))
+    categories.columns = category_col_names
+    
+    # Convert category values to 0 or 1
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] = categories[column].str[-1]
+    
+        # convert column from string to numeric
+        categories[column] = pd.to_numeric(categories[column])
+    
+    
+    # Replace categories column in df with new cateogry columns
+    # drop the original categories column from `df`
+    df.drop('categories', axis=1, inplace=True)
+
+    # concatenate the original dataframe with the new `categories` dataframe
+    df = pd.concat([df, categories], axis=1)
+    
+    # Remove duplicaates
+    df.drop_duplicates(inplace=True)
+    
+    return df
 
 
 def save_data(df, database_filename):
-    pass  
+    engine = create_engine(f'sqlite:///{database_filename}')
+    df.to_sql('tweets', engine, index=False)
+    
 
 
 def main():

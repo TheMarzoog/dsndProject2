@@ -23,7 +23,11 @@ def load_data(database_filepath):
     engine = create_engine(f'sqlite:///{database_filepath}')
     df = pd.read_sql_table('tweets', engine)
     
-    return df
+    X = df['message']
+    Y = df.drop(['id', 'message', 'original', 'genre'], axis=1)
+    category_names = Y.columns
+
+    return X, Y, category_names
 
 
 def tokenize(text):
@@ -67,7 +71,7 @@ def evaluate_model(model, X_test, Y_test):
     Y_pred = model.predict(X_test)
     
     for i, col in enumerate(Y_test):
-        print(col, classification_report(Y_test[col], Y_pred[:, i])
+        print(col, classification_report(Y_test[col], Y_pred[:, i]))
               
 
 
@@ -92,7 +96,7 @@ def main():
         model.fit(X_train, Y_train)
         
         print('Evaluating model...')
-        evaluate_model(model, X_test, Y_test, category_names)
+        evaluate_model(model, X_test, Y_test)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)

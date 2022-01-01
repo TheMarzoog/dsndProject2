@@ -20,6 +20,16 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 nltk.download(['punkt', 'stopwords', 'wordnet'])
 
 def load_data(database_filepath):
+    '''
+    INPUT:
+    database_filepath - file path of .db file
+
+    OUTPUT:
+    X - dataframe contaning the messages
+    Y - dataframe contaning the labels
+    catetory_names - list of labels names
+    '''
+
     engine = create_engine(f'sqlite:///{database_filepath}')
     df = pd.read_sql_table('tweets', engine)
     
@@ -31,6 +41,13 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''
+    INPUT:
+    text - string of the orginal messege
+    OUTPUT:
+    text - string of the message after normalizing, tokenzing, removing stop words, and lemmatizing
+    '''
+
     # normalize
     text = re.sub('\W', ' ', text.lower())
     # tokenize
@@ -44,6 +61,11 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    OUTPUT:
+    model - grid search object
+    '''
+
     
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
@@ -67,6 +89,13 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test):
+    '''
+    compute Y_pred then print the evalusation of the model
+    INPUT:
+    model - grid search object
+    X_test - test dataframe
+    Y_test - dataframe of test labels
+    '''
     
     Y_pred = model.predict(X_test)
     
@@ -76,6 +105,11 @@ def evaluate_model(model, X_test, Y_test):
 
 
 def save_model(model, model_filepath):
+    '''
+    INPUT:
+    model - estemator object to be saved
+    model_filepath - string of the filepath
+    '''
     
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)

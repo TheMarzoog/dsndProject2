@@ -5,6 +5,16 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    '''
+    INPUT:
+    messages_filepath - string of messages csv file path
+    categories_filepath - string of categories csv file path
+
+    OUTPUT:
+    df - dataframe contaning messages and categories join using id col
+    '''
+
+
     # reading massages and categories csv files
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
@@ -16,6 +26,18 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    '''
+    creat 36 category columns of 0 or 1 to replace the category col 
+    and removing the duplicate values
+
+    INPUT:
+    df - dataframe 
+    OUTPUT:
+    df - dataframe after cleaning the data
+    '''
+
+
+
     # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(';', expand=True)
     
@@ -50,6 +72,13 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    '''
+    INPUT:
+    df - dataframe to be saved
+    database_filename - name of the database file
+    '''
+
+
     engine = create_engine(f'sqlite:///{database_filename}')
     df.to_sql('tweets', engine, index=False)
     

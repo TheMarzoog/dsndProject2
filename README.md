@@ -1,6 +1,5 @@
 # Disaster Response Pipeline Project
-TO DO: add project summery
-
+The Disaster Response Pipeline Project is a data science project that uses data to predict the likelihood of a disaster happening from a tweet. The data goes through ETL and ML pipelines to predict the likelihood of a disaster happening. Then the model is deployed to a web application.
 
 ### Installation:
 1. Download the ZIP file of the project or type: `git clone https://github.com/marzoogtech/dsndProject2.git` on the terminal to clone the project.

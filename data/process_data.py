@@ -57,6 +57,8 @@ def clean_data(df):
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
     
+    # replacing the 2 to 1 in the related column
+    categories.related.replace(2, 1, inplace=True)
     
     # Replace categories column in df with new cateogry columns
     # drop the original categories column from `df`
@@ -80,7 +82,7 @@ def save_data(df, database_filename):
 
 
     engine = create_engine(f'sqlite:///{database_filename}')
-    df.to_sql('tweets', engine, index=False)
+    df.to_sql('tweets', engine, index=False, if_exists='replace')
     
 
 
